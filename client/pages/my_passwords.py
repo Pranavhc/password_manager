@@ -1,7 +1,8 @@
 import streamlit as st
 import requests
 
-api_url = "http://localhost:5000/api"
+# api_url = "http://localhost:5000/api" # local development
+api_url = "https://password-manager-ojvm.onrender.com/api" # production
 
 st.set_page_config(
     page_title="All Password",

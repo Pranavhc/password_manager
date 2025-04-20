@@ -1,6 +1,9 @@
 import streamlit as st
 import requests
 
+# api_url = "http://localhost:5000/api" # local development
+api_url = "https://password-manager-ojvm.onrender.com/api" # production
+
 # Set page config and apply custom dark theme styling.
 st.set_page_config(
     page_title="Password Manager",
@@ -27,7 +30,7 @@ with st.container():
 
     with cols[0]:
         if st.button("Login", key="login_button", type="primary", use_container_width=True):
-            res = requests.post("http://localhost:5000/api/auth/login", json={"email": email.strip(), "password": password.strip()})
+            res = requests.post(f"{api_url}/auth/login", json={"email": email.strip(), "password": password.strip()})
             if res.status_code == 200:
                 st.success("Login successful!")
                 token = res.json().get("token")
@@ -38,7 +41,7 @@ with st.container():
 
     with cols[2]:
         if st.button("Register", key="register_button", type="secondary", use_container_width=True):
-            res = requests.post("http://localhost:5000/api/auth/register", json={"email": email.strip(), "password": password.strip()})
+            res = requests.post(f"{api_url}/auth/register", json={"email": email.strip(), "password": password.strip()})
             if res.status_code == 201:
                 st.success("Register successful!")
                 token = res.json().get("token")
