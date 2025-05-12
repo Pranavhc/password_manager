@@ -1,8 +1,8 @@
 import streamlit as st
 import requests
 
-# api_url = "http://localhost:5000/api" # local development
-api_url = "https://password-manager-ojvm.onrender.com/api" # production
+api_url = "http://localhost:5000/api" # local development
+# api_url = "https://password-manager-ojvm.onrender.com/api" # production
 
 # Set page config and apply custom dark theme styling.
 st.set_page_config(

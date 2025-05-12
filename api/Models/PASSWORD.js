@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import crypto from 'crypto';
+import dotenv from "dotenv";
+dotenv.config();
 
 const passwordSchema = new mongoose.Schema({
     title: {
@@ -22,71 +25,43 @@ const passwordSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-// hashing password on save
-// noteSchema.pre("save", async function () {
-//     if (!this.password) return;
+function encrypt(text) {
+    const key = Buffer.from(process.env.securityKey, 'hex');
+    const iv = Buffer.from(process.env.initVector, 'hex');
 
-//     const salt = await bcrypt.genSalt(10); // random bits
-//     this.password = await bcrypt.hash(this.password, salt);
-// });
+    const cipher = crypto.createCipheriv(process.env.algorithm, key, iv);
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
+    return encrypted;
+}
 
-// // hashing password on update
-// noteSchema.pre("findOneAndUpdate", async function () {
-//     if (!this._update.password) return;
+function decrypt(text) {
+    const key = Buffer.from(process.env.securityKey, 'hex');
+    const iv = Buffer.from(process.env.initVector, 'hex');
 
-//     const salt = await bcrypt.genSalt(10); // random bits
-//     this._update.password = await bcrypt.hash(this._update.password, salt);
-// });
+    const decipher = crypto.createDecipheriv(process.env.algorithm, key, iv);
+    let decrypted = decipher.update(text, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+}
 
-// // hashing password on update
-// noteSchema.pre("update", async function () {
-//     if (!this._update.password) return;
+// Encrypt on save
+passwordSchema.pre("save", function () {
+    if (this.isModified("password")) {
+        this.password = encrypt(this.password);
+    }
+});
 
-//     const salt = await bcrypt.genSalt(10); // random bits
-//     this._update.password = await bcrypt.hash(this._update.password, salt);
-// });
+// Encrypt on update
+passwordSchema.pre("findOneAndUpdate", function () {
+    if (this._update.password) {
+        this._update.password = encrypt(this._update.password);
+    }
+});
 
-// // verifying password
-// noteSchema.methods.comparePassword = async function (enteredPass) {
-//     if (!this.password) return;
-//     const isMatch = await bcrypt.compare(enteredPass, this.password);
-//     return isMatch;
-// };
-
-// // encrypting content of note on save
-// noteSchema.pre("save", async function () {
-//     if (!this.content) return;
-
-//     const securityKey = Buffer.from(process.env.securityKey, 'hex');
-//     const initVector = Buffer.from(process.env.initVector, 'hex');
-
-//     const cipher = crypto.createCipheriv(process.env.algorithm, securityKey, initVector);
-//     let encryptedData = cipher.update(this.content, "utf-8", "hex");
-//     this.content = encryptedData + cipher.final("hex");
-// });
-
-// // encrypting content of note on update
-// noteSchema.pre("findOneAndUpdate", async function () {
-//     if (!this._update.content) return;
-
-//     const securityKey = Buffer.from(process.env.securityKey, 'hex');
-//     const initVector = Buffer.from(process.env.initVector, 'hex');
-
-//     const cipher = crypto.createCipheriv(process.env.algorithm, securityKey, initVector);
-//     let encryptedData = cipher.update(this._update.content, "utf-8", "hex");
-//     this._update.content = encryptedData + cipher.final("hex");
-// });
-
-// // decrypting content of note
-// noteSchema.methods.decryptNote = function () {
-//     if (!this.content) return;
-
-//     const securityKey = Buffer.from(process.env.securityKey, 'hex');
-//     const initVector = Buffer.from(process.env.initVector, 'hex');
-
-//     const decipher = crypto.createDecipheriv(process.env.algorithm, securityKey, initVector);
-//     let decryptedData = decipher.update(this.content, "hex", "utf-8");
-//     this.content = decryptedData + decipher.final("utf8");
-// };
+// Decrypt method
+passwordSchema.methods.decryptPass = function () {
+    return decrypt(this.password);
+};
 
 export default mongoose.model("password", passwordSchema);
