@@ -10,8 +10,8 @@ from zxcvbn import zxcvbn
 import secrets
 import string
 
-api_url = "http://localhost:5000/api" # local development
-# api_url = "https://password-manager-ojvm.onrender.com/api" # production
+# api_url = "http://localhost:5000/api" # local development
+api_url = "https://password-manager-ojvm.onrender.com/api" # production
 
 st.set_page_config(
     page_title="All Password",
